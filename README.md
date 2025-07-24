@@ -17,20 +17,42 @@ Este projeto tem como objetivo integrar, tratar e analisar dados coletados manua
    O código deste repositório realiza a leitura, tratamento e integração dos arquivos bibliométricos e gera novos arquivos padronizados.
 
 --- PRIMEIRO PASSO ---
- *     2.1. Insira os novos arquivos da Scopus no local:
- *     2.2. Insira os novos arquivos da Espacenet no local:
+
+- 2.1. Insira os novos arquivos da Scopus no local: 
+*       /workspaces/sismm-cti-amazon/dim_cientifica/input_scopus
+- 2.2. Insira os novos arquivos da Espacenet no local:
+*       /workspaces/sismm-cti-amazon/dim_tecnologica/espacenet_input
+- 2.3. Insira os novos arquivos do CNCFlora no local: 
+*      /workspaces/sismm-cti-amazon/cncflora
+- 2.4. Insira os novos arquivos do IPC no local: 
+*      /workspaces/sismm-cti-amazon/dim_tecnologica/ipc_descriptions
+- 2.5. Insira os novos arquivos do IPC Green Inventory no local: 
+*      /workspaces/sismm-cti-amazon/dim_tecnologica/ipc_green_inventory
 
  --- SEGUNDO PASSO ---
- *       2.3. Execute o código:
- *       2.4. Execute o código:
- *       2.5. Execute o código:
- *       2.6. Execute o código:
+- 2.3. Execute o código para limpeza dos dados provenientes da Scopus:
+*      /workspaces/sismm-cti-amazon/dim_cientifica/scopus_etapa_limpar.py
+  
+- 2.4. Execute o código para padronização final dos dados provenientes da Scopus:
+*      /workspaces/sismm-cti-amazon/dim_cientifica/scopus_etapa_padronizar.py
+  
+- 2.5. Execute o código:
+*      /workspaces/sismm-cti-amazon/dim_tecnologica/espacenet_etapa_limpar.py
+
+- 2.6. Execute o código:
+*      /workspaces/sismm-cti-amazon/dim_tecnologica/espacenet_etapa_padronizar.py
+
 
 --- TERCEIRO PASSO ---
-*      2.7. Salve os novos arquivos tratados e padronizados disponíveis na pasta:
-      - Posteriormente, salve-os no drive:
-*      2.8. Salve os novos arquivos tratados e padronizados disponíveis na pasta:
-      - Posteriormente, salve-os no drive:
+- 2.7. Salve os novos arquivos tratados e padronizados disponíveis na pasta:
+*      XXX
+  Posteriormente, salve-os no drive:
+*      XXX
+
+- 2.8. Salve os novos arquivos tratados e padronizados disponíveis na pasta:
+*      xxxxx
+  Posteriormente, salve-os no drive:
+*      xxxx
 
 --- QUARTO PASSO ---
  *     2.9. Importe os dados para as respectivas planilhas conforme orienta o arquivo: 
@@ -45,7 +67,7 @@ Este projeto tem como objetivo integrar, tratar e analisar dados coletados manua
 ## Estrutura Esperada dos Dados
 
 - As planilhas devem ser salvas no Google Drive em pastas específicas, conforme organização definida no projeto.
-- Cada planilha deve seguir o formato e as colunas especificadas no [Guia de Formatação de Dados](#) (adicione o link ou seção se houver).
+- Cada planilha deve seguir o formato e as colunas especificadas no [Guia de Formatação de Dados](#).
 
 ## Tecnologias Utilizadas
 
