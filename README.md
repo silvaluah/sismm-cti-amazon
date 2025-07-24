@@ -9,10 +9,35 @@ Este projeto tem como objetivo integrar, tratar e analisar dados coletados manua
 ## Fluxo de Trabalho
 
 1. **Coleta Manual de Dados:**  
-   O usuário deve coletar os dados manualmente nas fontes desejadas (Scopus, Espacenet, etc.) e inseri-los em planilhas específicas no Google Drive, seguindo os formatos e colunas padronizados.
+   O usuário deve coletar os dados manualmente nas fontes desejadas (Scopus, Espacenet, etc.) e salvá-los em formato csv, em seguida fazer upload conforme orientações antes de executar os códigos.
 
+       1.1. Das palavras-chave para busca: (Arquivo XXXXXX)
+ 
 2. **Processamento e Integração:**  
-   O código deste repositório realiza a leitura, tratamento e integração dos arquivos de dados presentes no Drive.
+   O código deste repositório realiza a leitura, tratamento e integração dos arquivos bibliométricos e gera novos arquivos padronizados.
+
+--- PRIMEIRO PASSO ---
+ *     2.1. Insira os novos arquivos da Scopus no local:
+ *     2.2. Insira os novos arquivos da Espacenet no local:
+
+ --- SEGUNDO PASSO ---
+ *       2.3. Execute o código:
+ *       2.4. Execute o código:
+ *       2.5. Execute o código:
+ *       2.6. Execute o código:
+
+--- TERCEIRO PASSO ---
+*      2.7. Salve os novos arquivos tratados e padronizados disponíveis na pasta:
+      - Posteriormente, salve-os no drive:
+*      2.8. Salve os novos arquivos tratados e padronizados disponíveis na pasta:
+      - Posteriormente, salve-os no drive:
+
+--- QUARTO PASSO ---
+ *     2.9. Importe os dados para as respectivas planilhas conforme orienta o arquivo: 
+       - A planilha atualizada será automaticamente processada como fonte do Looker Studio.
+
+--- QUINTO PASSO ---
+ -        VERIFIQUE A QUALIDADE DOS RESULTADOS OBTIDOS E EVENTUAIS FALHAS!
 
 3. **Geração de Insumos para o Painel:**  
    Após o processamento, os dados tratados ficam prontos para serem consumidos pelo painel interativo no Looker Studio.
