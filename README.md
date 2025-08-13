@@ -1,85 +1,101 @@
-# Sistema de Mapeamento e Monitoramento de Indicadores em CTI na Amazônia
+# Observatório de CT&I sobre Plantas Endêmicas da Amazônia
 
-Repositório do Sistema de Mapeamento e Monitoramento de Indicadores em CTI de plantas endêmicas da Amazônia, projeto de mestrado acadêmico em CI-UFSCar.
+Este repositório contém o código-fonte e a metodologia para o pipeline de dados desenvolvido como parte da dissertação [SEU TÍTULO AQUI]. O objetivo deste projeto é automatizar a coleta, limpeza, modelagem e integração de dados de múltiplas fontes para a criação de um painel de indicadores de Ciência, Tecnologia e Inovação (CT&I) sobre a flora endêmica da Amazônia.
 
-## Sobre o Projeto
+Este trabalho representa a **Fase 1** do projeto, focada na construção da infraestrutura de dados.
 
-Este projeto tem como objetivo integrar, tratar e analisar dados coletados manualmente de diversas fontes (como Scopus, Espacenet, entre outras) para geração de insumos a serem visualizados em um painel no Looker Studio. Focado em indicadores de ciência, tecnologia e inovação (CTI) sobre plantas endêmicas da Amazônia.
+---
 
-## Fluxo de Trabalho
+## 🏛️ Arquitetura do Pipeline
 
-1. **Coleta Manual de Dados:**  
-   O usuário deve coletar os dados manualmente nas fontes desejadas (Scopus, Espacenet, etc.) e salvá-los em formato csv, em seguida fazer upload conforme orientações antes de executar os códigos.
+O projeto implementa um pipeline de Extração, Transformação e Carga (ETL) que processa dados brutos e os estrutura em um **Modelo Estrela Híbrido**, otimizado para análise em ferramentas de Business Intelligence (BI) como o Looker Studio.
 
-       1.1. Das palavras-chave para busca: (Arquivo XXXXXX)
- 
-2. **Processamento e Integração:**  
-   O código deste repositório realiza a leitura, tratamento e integração dos arquivos bibliométricos e gera novos arquivos padronizados.
+O pipeline é composto por:
+* **Scripts de Processamento por Fonte:** Módulos dedicados para `Scopus`, `CNCFlora` e `Espacenet`.
+* **Script de Unificação:** Responsável por criar dimensões conformes (mestras), como a `dim_especies_mestre`, para conectar as diferentes fontes.
+* **Script Orquestrador (`main.py`):** Gerencia a execução de todo o pipeline em um único comando, respeitando as dependências de dados.
 
---- PRIMEIRO PASSO ---
+## 🛠️ Tecnologias Utilizadas
 
-- 2.1. Insira os novos arquivos da Scopus no local: 
-*       /workspaces/sismm-cti-amazon/dim_cientifica/input_scopus
-- 2.2. Insira os novos arquivos da Espacenet no local:
-*       /workspaces/sismm-cti-amazon/dim_tecnologica/espacenet_input
-- 2.3. Insira os novos arquivos do CNCFlora no local: 
-*      /workspaces/sismm-cti-amazon/cncflora
-- 2.4. Insira os novos arquivos do IPC no local: 
-*      /workspaces/sismm-cti-amazon/dim_tecnologica/ipc_descriptions
-- 2.5. Insira os novos arquivos do IPC Green Inventory no local: 
-*      /workspaces/sismm-cti-amazon/dim_tecnologica/ipc_green_inventory
+* **Linguagem:** Python 3.10+
+* **Bibliotecas Principais:** Pandas
+* **Ambiente:** Visual Studio Code (Codespaces)
+* **Controle de Versão:** Git & GitHub
 
- --- SEGUNDO PASSO ---
-- 2.3. Execute o código para limpeza dos dados provenientes da Scopus:
-*      /workspaces/sismm-cti-amazon/dim_cientifica/scopus_etapa_limpar.py
-  
-- 2.4. Execute o código para padronização final dos dados provenientes da Scopus:
-*      /workspaces/sismm-cti-amazon/dim_cientifica/scopus_etapa_padronizar.py
-  
-- 2.5. Execute o código:
-*      /workspaces/sismm-cti-amazon/dim_tecnologica/espacenet_etapa_limpar.py
+## 🚀 Guia de Instalação e Execução
 
-- 2.6. Execute o código:
-*      /workspaces/sismm-cti-amazon/dim_tecnologica/espacenet_etapa_padronizar.py
+Siga os passos abaixo para replicar o ambiente e executar o pipeline de dados.
 
+### 1. Configuração do Ambiente
 
---- TERCEIRO PASSO ---
-- 2.7. Salve os novos arquivos tratados e padronizados disponíveis na pasta:
-*      XXX
-  Posteriormente, salve-os no drive:
-*      XXX
+1.  **Clonar o Repositório:**
+    ```bash
+    git clone <URL_DO_SEU_REPOSITORIO_GITHUB>
+    cd <NOME_DA_PASTA_DO_PROJETO>
+    ```
 
-- 2.8. Salve os novos arquivos tratados e padronizados disponíveis na pasta:
-*      xxxxx
-  Posteriormente, salve-os no drive:
-*      xxxx
+2.  **Criar e Ativar o Ambiente Virtual:**
+    ```bash
+    # Criar o ambiente
+    python3 -m venv .venv
+    
+    # Ativar no macOS/Linux
+    source .venv/bin/activate
+    
+    # Ativar no Windows
+    # .venv\Scripts\activate
+    ```
 
---- QUARTO PASSO ---
- *     2.9. Importe os dados para as respectivas planilhas conforme orienta o arquivo: 
-       - A planilha atualizada será automaticamente processada como fonte do Looker Studio.
+3.  **Instalar as Dependências:**
+    Certifique-se de que o arquivo `requirements.txt` exista com o conteúdo abaixo e execute o comando de instalação.
 
---- QUINTO PASSO ---
- -        VERIFIQUE A QUALIDADE DOS RESULTADOS OBTIDOS E EVENTUAIS FALHAS!
+    *Conteúdo do `requirements.txt`:*
+    ```
+    pandas
+    ```
 
-3. **Geração de Insumos para o Painel:**  
-   Após o processamento, os dados tratados ficam prontos para serem consumidos pelo painel interativo no Looker Studio.
+    *Comando de Instalação:*
+    ```bash
+    pip install -r requirements.txt
+    ```
 
-## Estrutura Esperada dos Dados
+### 2. Organização dos Dados Brutos
 
-- As planilhas devem ser salvas no Google Drive em pastas específicas, conforme organização definida no projeto.
-- Cada planilha deve seguir o formato e as colunas especificadas no [Guia de Formatação de Dados](#).
+Antes da execução, os arquivos de dados brutos devem ser posicionados na seguinte estrutura dentro de `data/raw/`:
 
-## Tecnologias Utilizadas
+data/raw/
+├── cncflora/
+│   ├── lista_vermelha_cnc_flora.csv
+│   └── termos_plantas.txt
+├── espacenet_input/
+│   ├── espacenet_angiosperma.csv
+│   └── espacenet_samambaias_e_licofitas.csv
+├── scopus_input/
+│   ├── scopus_angiospermas.csv
+│   └── ... (outros arquivos da Scopus)
+└── espacenet_resumo_plantas.csv
 
-- Python (linguagem principal do projeto)
-- VS Code (interface para trabalhar com o python)
-- Google Drive (armazenamento dos dados)
-- Looker Studio (visualização dos indicadores)
+### 3. Execução do Pipeline Completo
 
-## Como Contribuir
+Com o ambiente configurado e os dados no lugar, execute o pipeline com um único comando a partir da **pasta raiz** do projeto:
 
-Sugestões, correções e melhorias são muito bem-vindas. Sinta-se à vontade para abrir issues ou pull requests.
+```bash
+python main.py
 
-## Licença
+O script irá orquestrar todos os passos, exibindo o progresso no terminal. Ao final, todos os arquivos processados e modelados estarão na pasta data/processed/.
 
-[Especifique a licença do projeto, se houver]
+⚙️ Descrição dos Componentes do Pipeline
+scripts/processar_scopus.py: Limpa, transforma e modela os dados da Scopus.
+
+scripts/processar_cncflora.py: Processa os dados da CNCFlora.
+
+scripts/processar_espacenet.py: Processa os dados de patentes da Espacenet.
+
+scripts/unificar_fontes.py: Integra os outputs dos scripts de processamento, criando as dimensões mestras.
+
+main.py: Orquestrador principal que executa todos os outros scripts na ordem correta.
+
+🗺️ Roadmap de Trabalhos Futuros
+Fase 2: Inclusão de novas fontes de dados sobre sustentabilidade e unificação com o modelo atual.
+
+Fase 3: Conexão do Data Warehouse final com o Looker Studio, desenvolvimento dos indicadores visuais e avaliação geral do processo.
