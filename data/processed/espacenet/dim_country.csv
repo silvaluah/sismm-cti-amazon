@@ -1,0 +1,22 @@
+country_id,country_code,country_name
+0,AR,Argentina
+1,AT,Áustria
+2,AU,Austrália
+3,BR,Brasil
+4,CA,Canadá
+5,CH,Suíça
+6,CN,China
+7,DE,Alemanha
+8,DK,Dinamarca
+9,EP,Organização Europeia de Patentes (OPE/EPO)
+10,ES,Espanha
+11,FR,França
+12,GB,Reino Unido
+13,IL,Israel
+14,IN,India
+15,JP,Japão
+16,KR,Coreia do Sul
+17,RU,Federação Russa
+18,US,Estados Unidos da América
+19,WO,Organização Mundial da Propriedade Intelectual (OMPI/WIPO)
+20,ZA,África do Sul

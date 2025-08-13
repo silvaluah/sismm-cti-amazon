@@ -1,0 +1,44 @@
+# Arquivos de Ambiente Virtual
+/venv
+/.venv
+/env/
+/venv.bak
+/env.bak
+
+# Arquivos de Cache do Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Arquivos de configuração de IDEs e Editores
+.vscode/
+.idea/
+
+# Arquivos de Dependências e Build
+*.egg-info/
+/dist/
+/build/
+
+# Arquivos de Teste e Cobertura
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Jupyter Notebook Checkpoints
+.ipynb_checkpoints
+
+# Arquivos de Sistema Operacional
+.DS_Store
+Thumbs.db
+
+# Arquivos de Dados e Backups (conforme solicitado)
+data/raw/
+backup/
+
+# Arquivos de Saída (opcional, mas recomendado)
+looker_studio_output/
+
+# Arquivos de ambiente com variáveis sensíveis
+.env
+*.env
