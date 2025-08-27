@@ -1,3 +1,4 @@
+import csv
 import pandas as pd
 from pathlib import Path
 import unicodedata
@@ -31,13 +32,24 @@ def padronizar_nomes_colunas(df):
     return df
 
 def limpar_dataframe_scopus(df):
+    """Função de limpeza MODIFICADA para preservar colunas essenciais."""
     print("Iniciando limpeza do DataFrame...")
     df = df.copy()
+    
+    # Colunas que NUNCA devem ser removidas, mesmo que tenham muitos nulos
+    colunas_essenciais_a_manter = ['eid', 'title', 'abstract', 'authors', 'year', 'source_title']
+    
     limiar = 60.0
     percentual_ausente = (df.isnull().sum() / len(df)) * 100
-    colunas_para_remover = percentual_ausente[percentual_ausente > limiar].index.tolist()
+    
+    # Calcula as colunas para remover, mas EXCLUI as essenciais da lista de remoção
+    colunas_para_remover = percentual_ausente[percentual_ausente > limiar].index
+    colunas_para_remover = [col for col in colunas_para_remover if col not in colunas_essenciais_a_manter]
+    
     df = df.drop(columns=colunas_para_remover)
-    print(f"Colunas com mais de {limiar}% de ausência foram removidas.")
+    print(f"Colunas com mais de {limiar}% de ausência foram removidas (preservando as essenciais).")
+    
+    # O resto da sua lógica de limpeza está ótima e permanece igual
     for coluna in df.columns:
         if df[coluna].isnull().any():
             if df[coluna].dtype == 'object':
@@ -45,15 +57,18 @@ def limpar_dataframe_scopus(df):
             else:
                 df[coluna] = df[coluna].fillna(0)
     print("Valores ausentes restantes foram preenchidos.")
+    
     colunas_para_converter = ['year', 'volume', 'issue', 'page_start', 'page_end', 'page_count', 'cited_by']
     for coluna in colunas_para_converter:
         if coluna in df.columns:
             df[coluna] = pd.to_numeric(df[coluna], errors='coerce').fillna(0).astype(int)
     print("Tipos de dados corrigidos.")
-    num_duplicatas = df.duplicated().sum()
+    
+    num_duplicatas = df.duplicated(subset=['eid']).sum() if 'eid' in df.columns else df.duplicated().sum()
     if num_duplicatas > 0:
-        df = df.drop_duplicates(keep='first')
+        df = df.drop_duplicates(subset=['eid'], keep='first') if 'eid' in df.columns else df.drop_duplicates(keep='first')
         print(f"{num_duplicatas} linhas duplicadas foram removidas.")
+        
     print("Limpeza do DataFrame concluída.")
     return df
 
@@ -203,10 +218,8 @@ def main():
         df_padronizado = padronizar_nomes_colunas(df_raw)
         df_final_limpo = limpar_dataframe_scopus(df_padronizado)
         
-        # --- Dicionário para guardar todas as tabelas geradas ---
         tabelas_finais = {}
         
-        # --- Executa a criação dos modelos dimensionais ---
         dim_autores, pon_artigo_autores = criar_modelo_autores(df_final_limpo)
         tabelas_finais['dim_autores_scopus'] = dim_autores
         tabelas_finais['pon_artigo_autores_scopus'] = pon_artigo_autores
@@ -215,8 +228,6 @@ def main():
         tabelas_finais['dim_afiliacoes_scopus'] = dim_afiliacoes
         tabelas_finais['pon_artigo_afiliacoes_scopus'] = pon_artigo_afiliacoes
 
-        # --- Usa a função genérica para as demais dimensões ---
-        # Lista de tuplas: (nome_da_coluna_original, nome_da_entidade_singular)
         colunas_genericas_para_processar = [
             ('author_keywords', 'keyword'),
             ('index_keywords', 'index_keyword')
@@ -224,19 +235,20 @@ def main():
         
         for coluna, entidade in colunas_genericas_para_processar:
             dim_gen, pon_gen = criar_modelo_generico(df_final_limpo, coluna, entidade)
-            tabelas_finais[f'dim_{entidade}s_scopus'] = dim_gen # ex: dim_keywords_scopus
-            tabelas_finais[f'pon_artigo_{entidade}s_scopus'] = pon_gen # ex: pon_artigo_keywords_scopus
+            tabelas_finais[f'dim_{entidade}s_scopus'] = dim_gen
+            tabelas_finais[f'pon_artigo_{entidade}s_scopus'] = pon_gen
             
-        # --- Salva todos os arquivos finais ---
         print("\n--- Salvando todos os arquivos processados ---")
         for nome_tabela, df_tabela in tabelas_finais.items():
             if df_tabela is not None:
                 caminho_saida = caminho_dados_processados / f'{nome_tabela}.csv'
-                df_tabela.to_csv(caminho_saida, index=False)
+                # --- MUDANÇA CRUCIAL NO SALVAMENTO ---
+                df_tabela.to_csv(caminho_saida, index=False, quoting=csv.QUOTE_ALL, encoding='utf-8-sig')
                 print(f"Salvo: {nome_tabela}.csv")
         
-        # O DataFrame principal (futura tabela fato) ainda precisa ser ajustado
-        df_final_limpo.to_csv(caminho_dados_processados / 'scopus_dados_limpos_temp.csv', index=False)
+        # --- MUDANÇA CRUCIAL NO SALVAMENTO ---
+        caminho_saida_temp = caminho_dados_processados / 'scopus_dados_limpos_temp.csv'
+        df_final_limpo.to_csv(caminho_saida_temp, index=False, quoting=csv.QUOTE_ALL, encoding='utf-8-sig')
         print(f"Salvo: scopus_dados_limpos_temp.csv")
 
         print(f"\nProcessamento concluído. Arquivos salvos em: {caminho_dados_processados}")
