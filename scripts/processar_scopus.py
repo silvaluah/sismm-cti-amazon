@@ -5,7 +5,7 @@ import unicodedata
 import re
 import uuid
 
-# (As funções de limpeza e as de criação de modelos de autores/afiliações continuam aqui)
+# Funções de limpeza e de criação de modelos de autores/afiliações
 def carregar_e_consolidar_dados(caminho_pasta_raw):
     print("Iniciando a consolidação dos dados brutos...")
     caminho_base = Path(caminho_pasta_raw)
@@ -49,7 +49,7 @@ def limpar_dataframe_scopus(df):
     df = df.drop(columns=colunas_para_remover)
     print(f"Colunas com mais de {limiar}% de ausência foram removidas (preservando as essenciais).")
     
-    # O resto da sua lógica de limpeza está ótima e permanece igual
+    # Restante da lógica de limpeza
     for coluna in df.columns:
         if df[coluna].isnull().any():
             if df[coluna].dtype == 'object':
@@ -74,7 +74,7 @@ def limpar_dataframe_scopus(df):
 
 def criar_modelo_autores(df_limpo):
     print("Iniciando a criação do modelo de autores (versão robusta)...")
-    # (código da função omitido por brevidade, mas continua o mesmo)
+    # (código da função omitido por brevidade)
     colunas_autores = ['eid', 'authors', 'authors_id', 'author_full_names']
     if not all(col in df_limpo.columns for col in colunas_autores):
         return None, None
@@ -130,7 +130,7 @@ def _parse_e_normalizar_afiliacao(texto_afiliacao):
 
 def criar_modelo_afiliacoes(df_limpo):
     print("Iniciando a criação do modelo de afiliações (com separação de endereço)...")
-    # (código da função omitido por brevidade, mas continua o mesmo)
+    # (código da função omitido por brevidade)
     if 'affiliations' not in df_limpo.columns or 'eid' not in df_limpo.columns:
         return None, None
     df_afiliacoes_trab = df_limpo[['eid', 'affiliations']].copy()
@@ -156,7 +156,7 @@ def criar_modelo_afiliacoes(df_limpo):
     return dim_afiliacoes, pon_artigo_afiliacoes
 
 
-# --- FUNÇÃO GENÉRICA NOVA ---
+# Função genérica
 def criar_modelo_generico(df_limpo, nome_coluna, nome_entidade):
     """
     Função genérica para criar uma dimensão e uma tabela ponte a partir de uma coluna multivalorada.
@@ -201,7 +201,7 @@ def criar_modelo_generico(df_limpo, nome_coluna, nome_entidade):
     return dim_df, pon_df
 
 # ==============================================================================
-# FUNÇÃO PRINCIPAL (ORQUESTRADOR - ATUALIZADO)
+# FUNÇÃO PRINCIPAL (ORQUESTRADOR)
 # ==============================================================================
 
 def main():
@@ -242,11 +242,9 @@ def main():
         for nome_tabela, df_tabela in tabelas_finais.items():
             if df_tabela is not None:
                 caminho_saida = caminho_dados_processados / f'{nome_tabela}.csv'
-                # --- MUDANÇA CRUCIAL NO SALVAMENTO ---
                 df_tabela.to_csv(caminho_saida, index=False, quoting=csv.QUOTE_ALL, encoding='utf-8-sig')
                 print(f"Salvo: {nome_tabela}.csv")
         
-        # --- MUDANÇA CRUCIAL NO SALVAMENTO ---
         caminho_saida_temp = caminho_dados_processados / 'scopus_dados_limpos_temp.csv'
         df_final_limpo.to_csv(caminho_saida_temp, index=False, quoting=csv.QUOTE_ALL, encoding='utf-8-sig')
         print(f"Salvo: scopus_dados_limpos_temp.csv")

@@ -11,8 +11,7 @@ import sys
 from pathlib import Path
 
 def run_script(script_path, args_list=None):
-    """Executa um script Python com argumentos opcionais e verifica se houve erros."""
-    # (Esta função permanece inalterada)
+    # Executa um script Python com argumentos opcionais e verifica se houve erros
     if args_list is None:
         args_list = []
     print(f"\n--- Executando: {script_path.name} ---")
@@ -45,8 +44,7 @@ def main():
     
     scripts_dir = Path("scripts")
     
-    # --- ORDEM DE EXECUÇÃO CORRIGIDA ---
-    # Colocamos 'unificar_fontes.py' antes de 'processar_espacenet.py'
+    # --- ORDEM DE EXECUÇÃO ---
     scripts_para_executar = [
         (scripts_dir / 'processar_scopus.py', []),
         (scripts_dir / 'processar_cncflora.py', []),

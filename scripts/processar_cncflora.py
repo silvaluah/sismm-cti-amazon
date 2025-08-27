@@ -1,12 +1,9 @@
-# scripts/processar_cncflora.py (VERSÃO CORRIGIDA)
-
 import pandas as pd
 from pathlib import Path
 import unicodedata
 import re
 
-# (As funções auxiliares no topo do arquivo continuam as mesmas)
-# ...
+# (Funções auxiliares)
 def carregar_dados_cncflora(caminho_pasta_raw):
     print("Iniciando carregamento dos dados da CNCFlora...")
     caminho_csv = caminho_pasta_raw / 'lista_vermelha_cnc_flora.csv'
@@ -110,14 +107,13 @@ def main():
     dimensoes_simples_para_juntar = {"grupo": dim_grupo, "categoria_risco": dim_categoria_risco, "especie": dim_especies_temp}
     fato_gorda_cncflora = criar_saida_otimizada_looker(fato_avaliacoes, dimensoes_simples_para_juntar)
 
-    # CORREÇÃO: Adicionando a tabela temporária de espécies de volta à lista de salvamento
     tabelas_para_salvar = {
         "fato_gorda_cncflora": fato_gorda_cncflora,
         "dim_acoes_conservacao": dim_acoes,
         "dim_ameacas": dim_ameacas,
         "pon_avaliacao_acao": pon_acoes,
         "pon_avaliacao_ameaca": pon_ameacas,
-        "dim_especies_cncflora_temp": dim_especies_temp # <-- ESTA LINHA É A CORREÇÃO
+        "dim_especies_cncflora_temp": dim_especies_temp
     }
     
     print("\n--- Salvando arquivos otimizados para Looker Studio ---")

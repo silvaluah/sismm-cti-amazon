@@ -1,13 +1,11 @@
-# scripts/unificar_fontes.py (VERSÃO CORRIGIDA)
 import pandas as pd
 from pathlib import Path
 import re
-import sys # <-- Importar a biblioteca sys
+import sys
 
 def unificar_fontes_e_criar_ligacoes():
-    """
-    Lê os dados processados, cria a dimensão de espécies unificada e a tabela ponte artigo-espécie.
-    """
+   
+    # Lê os dados processados, cria a dimensão de espécies unificada e a tabela ponte artigo-espécie.
     print("Iniciando o processo de unificação das fontes de dados...")
 
     caminho_script = Path(__file__).parent
@@ -24,9 +22,8 @@ def unificar_fontes_e_criar_ligacoes():
     except FileNotFoundError as e:
         print(f"ERRO: Não foi possível encontrar um dos arquivos de entrada: {e}")
         print("Certifique-se de que os scripts anteriores foram executados com sucesso.")
-        sys.exit(1) # <-- CORREÇÃO: Força o script a parar com um código de erro
+        sys.exit(1) # Força o script a parar com um código de erro
 
-    # (O resto da função continua o mesmo)
     lista_de_plantas = df_especies_cncflora['nome_cientifico'].dropna().unique().tolist()
     regex_pattern = r'\b(' + '|'.join(re.escape(nome) for nome in lista_de_plantas) + r')\b'
     print(f"Buscando por {len(lista_de_plantas)} nomes de plantas nos artigos da Scopus...")

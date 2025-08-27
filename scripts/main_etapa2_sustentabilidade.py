@@ -1,8 +1,4 @@
-# Em scripts/main_etapa2_sustentabilidade.py
-
-"""
-Orquestrador da ETAPA 2: Enriquecimento com Dados de Sustentabilidade.
-"""
+# Orquestrador da ETAPA 2: Enriquecimento com Dados de Sustentabilidade.
 
 import subprocess
 import sys

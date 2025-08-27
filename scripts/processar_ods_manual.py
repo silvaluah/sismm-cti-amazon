@@ -34,7 +34,7 @@ def carregar_dados_ods_manual(filepath):
                 if not line: continue # Pula linhas vazias
                 
                 try:
-                    # A MÁGICA: Divide a linha no máximo 2 vezes, da esquerda para a direita.
+                    # Divide a linha no máximo 2 vezes, da esquerda para a direita.
                     # Isso garante que a 3ª parte pegue todo o resto da linha, com vírgulas e tudo.
                     parts = line.split(',', 2)
                     if len(parts) == 3:
@@ -57,7 +57,6 @@ def carregar_dados_ods_manual(filepath):
 
 def salvar_dados(df, filepath):
     """Salva o DataFrame final em um arquivo CSV."""
-    # (Esta função está correta)
     try:
         output_dir = os.path.dirname(filepath)
         if not os.path.exists(output_dir) and output_dir:
@@ -69,7 +68,7 @@ def salvar_dados(df, filepath):
         sys.exit(1)
 
 def main():
-    """Função principal que orquestra a execução do script."""
+    # Função principal que orquestra a execução do script.
     parser = argparse.ArgumentParser(description="Script para integrar classificações manuais de ODS.")
     parser.add_argument('--artigos_input', required=True, help="Caminho para o CSV de artigos processados.")
     parser.add_argument('--ods_manual_input', required=True, help="Caminho para o CSV com a classificação manual de ODS.")
