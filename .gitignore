@@ -41,4 +41,6 @@ looker_studio_output/
 
 # Arquivos de ambiente com variáveis sensíveis
 .env
-*.env
+*.envconfig/
+config/
+config/
