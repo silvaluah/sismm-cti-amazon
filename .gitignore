@@ -37,12 +37,13 @@ Thumbs.db
 data/processed
 data/raw
 backup/
-
+data/processed/
+looker_studio_output/
 
 
 # Arquivos de ambiente com variáveis sensíveis
 .env
 *.envconfig/
 config/
-config/
-config/
+
+
