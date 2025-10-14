@@ -27,17 +27,18 @@ htmlcov/
 
 # Jupyter Notebook Checkpoints
 .ipynb_checkpoints
+notebooks
 
 # Arquivos de Sistema Operacional
 .DS_Store
 Thumbs.db
 
-# Arquivos de Dados e Backups (conforme solicitado)
-data/raw/
+# Arquivos de Dados e Backups
+data/processed
+data/raw
 backup/
 
-# Arquivos de Saída (opcional, mas recomendado)
-looker_studio_output/
+
 
 # Arquivos de ambiente com variáveis sensíveis
 .env
