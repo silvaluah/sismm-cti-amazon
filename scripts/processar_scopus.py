@@ -72,43 +72,69 @@ def limpar_dataframe_scopus(df):
     print("Limpeza do DataFrame concluída.")
     return df
 
+# Em scripts/processar_scopus.py
+
 def criar_modelo_autores(df_limpo):
     print("Iniciando a criação do modelo de autores (versão robusta)...")
-    # (código da função omitido por brevidade)
     colunas_autores = ['eid', 'authors', 'authors_id', 'author_full_names']
     if not all(col in df_limpo.columns for col in colunas_autores):
+        print("Aviso: Colunas de autor ausentes. Pulando modelagem de autores.")
         return None, None
+        
     df_autores_trab = df_limpo[colunas_autores].copy()
+    
+    # Processa sobrenomes
     df_sobrenomes = df_autores_trab[['eid', 'authors']].copy()
     df_sobrenomes['authors'] = df_sobrenomes['authors'].str.replace(r'\s*\(\d+\)', '', regex=True)
     df_sobrenomes['authors'] = df_sobrenomes['authors'].str.split(r'\s*;\s*', regex=True)
     df_sobrenomes = df_sobrenomes.explode('authors').dropna(subset=['authors'])
     df_sobrenomes['author_index'] = df_sobrenomes.groupby('eid').cumcount()
+    
+    # Processa nomes completos
     df_nomes_completos = df_autores_trab[['eid', 'author_full_names']].copy()
     df_nomes_completos['author_full_names'] = df_nomes_completos['author_full_names'].str.split(r'\s*;\s*', regex=True)
     df_nomes_completos = df_nomes_completos.explode('author_full_names').dropna(subset=['author_full_names'])
     df_nomes_completos['author_index'] = df_nomes_completos.groupby('eid').cumcount()
-    df_nomes_completos['id_from_name'] = df_nomes_completos['author_full_names'].str.extract(r'\((\d+)\)')
+    
+    # --- CORREÇÃO APLICADA AQUI ---
+    # .str.extract() retorna um DataFrame. Usamos [0] para pegar a primeira (e única) coluna como uma Series.
+    extracted_ids = df_nomes_completos['author_full_names'].str.extract(r'\((\d+)\)')[0]
+    df_nomes_completos['id_from_name'] = extracted_ids.fillna('').astype(str).str.strip()
+    
     df_nomes_completos['author_full_names'] = df_nomes_completos['author_full_names'].str.replace(r'\s*\(\d+\)$', '', regex=True).str.strip()
+    
+    # Processa IDs
     df_ids = df_autores_trab[['eid', 'authors_id']].copy()
-    df_ids['authors_id'] = df_ids['authors_id'].str.split(r'\s*;\s*', regex=True)
+    df_ids['authors_id'] = df_ids['authors_id'].astype(str).str.strip().str.split(r'\s*;\s*', regex=True)
     df_ids = df_ids.explode('authors_id').dropna(subset=['authors_id'])
+    df_ids = df_ids[df_ids['authors_id'] != '']
+
+    # Merges
     df_nomes_alinhados = pd.merge(df_sobrenomes, df_nomes_completos, on=['eid', 'author_index'], how='outer')
     df_alinhado = pd.merge(
         df_nomes_alinhados, df_ids,
         left_on=['eid', 'id_from_name'], right_on=['eid', 'authors_id'],
         how='right'
     )
+    
     df_alinhado['author_full_names'].fillna(df_alinhado['authors'], inplace=True)
     df_alinhado['author_full_names'] = df_alinhado['author_full_names'].str.upper()
+    
+    # Cria a tabela de dimensão
     dim_autores = df_alinhado[['authors_id', 'author_full_names']].copy()
+    dim_autores['authors_id'] = dim_autores['authors_id'].astype(str).str.strip()
     dim_autores.rename(columns={'author_full_names': 'nome_completo'}, inplace=True)
     dim_autores = dim_autores.drop_duplicates(subset=['authors_id']).dropna(subset=['authors_id'])
     dim_autores = dim_autores[dim_autores['authors_id'] != 'nao_informado']
-    print(f"Criada dim_autores com {len(dim_autores)} autores únicos.")
+    
+    # Cria a tabela ponte
     pon_artigo_autores = df_alinhado[['eid', 'authors_id']].drop_duplicates().dropna()
+    pon_artigo_autores['authors_id'] = pon_artigo_autores['authors_id'].astype(str).str.strip()
     pon_artigo_autores.rename(columns={'eid': 'article_id'}, inplace=True)
+    
+    print(f"Criada dim_autores com {len(dim_autores)} autores únicos.")
     print(f"Criada pon_artigo_autores com {len(pon_artigo_autores)} relações.")
+    
     return dim_autores, pon_artigo_autores
 
 def _parse_e_normalizar_afiliacao(texto_afiliacao):
