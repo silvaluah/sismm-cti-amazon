@@ -21,8 +21,7 @@ O projeto implementa um pipeline de Extração, Transformação e Carga (ETL) or
 
 O fluxograma abaixo foi gerado automaticamente pelo script `scripts/desenhar_pipeline.py` e detalha o fluxo de dados completo, desde as fontes brutas até a camada de apresentação.
 
-*Obs: Certifique-se de que o nome do arquivo abaixo corresponde ao nome da imagem final gerada no seu repositório.*
-![Fluxograma detalhado do pipeline de dados, mostrando as 4 etapas principais](pipeline_arquitetura_com_legenda.png)
+![Fluxograma detalhado do pipeline de dados, mostrando as 4 etapas principais](pipeline_arquitetura_refinada.png)
 
 ## 🛠️ Tecnologias Utilizadas
 
@@ -75,13 +74,13 @@ Siga os passos abaixo para replicar o ambiente e executar o pipeline de dados.
 
 Antes da execução, os arquivos de dados brutos devem ser posicionados na seguinte estrutura dentro de `data/raw/`:
 
-data/raw/
-├── cncflora/
-│   └── lista_vermelha_cnc_flora.csv
-├── espacenet_input/
-│   └── espacenet_angiosperma.csv
-└── scopus_input/
-└── scopus_angiospermas.csv
+    data/raw/
+    ├── cncflora/
+    │   └── lista_vermelha_cnc_flora.csv
+    ├── espacenet_input/
+    │   └── espacenet_angiosperma.csv
+    └── scopus_input/
+    └── scopus_angiospermas.csv
 
 ### 3. Execução do Pipeline
 
@@ -99,13 +98,18 @@ python scripts/main\(EXECUTE\)/main_etapa3_achatamento.py
 
 # Etapa 4: Faz o upload dos dados para a camada de apresentação
 python scripts/main\(EXECUTE\)/main_etapa4_upload.py
+```
 
+---
 ## ⚙️ Descrição dos Componentes
-* **scripts/main(EXECUTE)/:** Contém os scripts orquestradores de cada uma das 4 etapas principais do pipeline.
-* **scripts/:** Contém os scripts específicos com a lógica de negócio para processar cada fonte de dados. São chamados pelos orquestradores.
-* **scripts/desenhar_pipeline.py:** Script utilitário para gerar o diagrama da arquitetura do projeto.
+
+    * **scripts/main(EXECUTE)/:** Contém os scripts orquestradores de cada uma das 4 etapas principais do pipeline.
+    * **scripts/:** Contém os scripts específicos com a lógica de negócio para processar cada fonte de dados. São chamados pelos orquestradores.
+    * **scripts/desenhar_pipeline.py:** Script utilitário para gerar o diagrama da arquitetura do projeto.
+
 
 ## 🛣️ Roadmap de Trabalhos Futuros
-* Inclusão de novas fontes de dados (a serem definidas) e integração com o modelo de dados atual;
-* Avaliação geral do processo de automação.
+
+    * Inclusão de novas fontes de dados (a serem definidas) e integração com o modelo de dados atual;
+    * Avaliação geral do processo de automação.
 
