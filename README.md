@@ -1,24 +1,34 @@
 # Observatório de CT&I sobre Plantas Endêmicas da Amazônia
 
-Este repositório contém o código-fonte e a metodologia para o pipeline de dados desenvolvido como parte da dissertação [SEU TÍTULO AQUI]. O objetivo deste projeto é automatizar a coleta, limpeza, modelagem e integração de dados de múltiplas fontes para a criação de um painel de indicadores de Ciência, Tecnologia e Inovação (CT&I) sobre a flora endêmica da Amazônia.
+![Python](https://img.shields.io/badge/Python-3.10%2B-blue?style=for-the-badge&logo=python)
+![Pandas](https://img.shields.io/badge/Pandas-1.5%2B-blue?style=for-the-badge&logo=pandas)
+![License](https://img.shields.io/badge/License-MIT-green.svg?style=for-the-badge)
 
-Este trabalho representa a **Fase 1** do projeto, focada na construção da infraestrutura de dados.
+Este repositório contém o código-fonte e a metodologia para o pipeline de dados desenvolvido como parte da dissertação **Indicadores bibliométricos e sustentabilidade: painel para monitoramento de  desenvolvimentos científicos e tecnológicos sobre plantas endêmicas da Amazônia**. O objetivo deste projeto é automatizar a coleta, limpeza, modelagem e integração de dados de múltiplas fontes para a criação de um painel de indicadores de Ciência, Tecnologia e Inovação (CT&I) sobre a flora endêmica da Amazônia.
 
 ---
 
 ## 🏛️ Arquitetura do Pipeline
 
-O projeto implementa um pipeline de Extração, Transformação e Carga (ETL) que processa dados brutos e os estrutura em um **Modelo Estrela Híbrido**, otimizado para análise em ferramentas de Business Intelligence (BI) como o Looker Studio.
+O projeto implementa um pipeline de Extração, Transformação e Carga (ETL) orquestrado em **quatro etapas principais**. Cada etapa é gerenciada por um script específico, garantindo modularidade e clareza no fluxo de dados, que processa dados brutos e os estrutura em um modelo otimizado para análise.
 
-O pipeline é composto por:
-* **Scripts de Processamento por Fonte:** Módulos dedicados para `Scopus`, `CNCFlora` e `Espacenet`.
-* **Script de Unificação:** Responsável por criar dimensões conformes (mestras), como a `dim_especies_mestre`, para conectar as diferentes fontes.
-* **Script Orquestrador (`main.py`):** Gerencia a execução de todo o pipeline em um único comando, respeitando as dependências de dados.
+* **Etapa 1 (Processamento Base):** Realiza a extração e limpeza inicial dos dados brutos das fontes principais (`Scopus`, `CNCFlora`, `Espacenet`) e cria uma dimensão mestre de espécies.
+* **Etapa 2 (Enriquecimento):** Adiciona camadas de informação de sustentabilidade, processando dados de ODS (Objetivos de Desenvolvimento Sustentável) e patentes "verdes".
+* **Etapa 3 (Achatamento):** Consolida e transforma os dados processados e enriquecidos em tabelas finais (modelo estrela), otimizadas para performance em ferramentas de BI.
+* **Etapa 4 (Carga):** Realiza o upload das tabelas finais para a camada de apresentação (Google Sheets), que serve como fonte de dados para o painel no Looker Studio.
+
+## 🗺️ Arquitetura Visual (Fluxograma)
+
+O fluxograma abaixo foi gerado automaticamente pelo script `scripts/desenhar_pipeline.py` e detalha o fluxo de dados completo, desde as fontes brutas até a camada de apresentação.
+
+*Obs: Certifique-se de que o nome do arquivo abaixo corresponde ao nome da imagem final gerada no seu repositório.*
+![Fluxograma detalhado do pipeline de dados, mostrando as 4 etapas principais](pipeline_arquitetura_com_legenda.png)
 
 ## 🛠️ Tecnologias Utilizadas
 
 * **Linguagem:** Python 3.10+
 * **Bibliotecas Principais:** Pandas
+* **Visualização da Arquitetura:** Graphviz
 * **Ambiente:** Visual Studio Code (Codespaces)
 * **Controle de Versão:** Git & GitHub
 
@@ -42,22 +52,24 @@ Siga os passos abaixo para replicar o ambiente e executar o pipeline de dados.
     # Ativar no macOS/Linux
     source .venv/bin/activate
     
-    # Ativar no Windows
-    # .venv\Scripts\activate
+    # Ativar no Windows (PowerShell)
+    # .\.venv\Scripts\Activate.ps1
     ```
 
 3.  **Instalar as Dependências:**
-    Certifique-se de que o arquivo `requirements.txt` exista com o conteúdo abaixo e execute o comando de instalação.
+    Certifique-se de que o arquivo `requirements.txt` exista na raiz do projeto com o conteúdo abaixo.
 
     *Conteúdo do `requirements.txt`:*
     ```
     pandas
+    graphviz
     ```
 
     *Comando de Instalação:*
     ```bash
     pip install -r requirements.txt
     ```
+    *Obs: A biblioteca `graphviz` do Python requer uma instalação no sistema operacional. Em ambientes baseados em Debian/Ubuntu (como o GitHub Codespaces), execute: `sudo apt-get update && sudo apt-get install -y graphviz`*
 
 ### 2. Organização dos Dados Brutos
 
@@ -65,134 +77,35 @@ Antes da execução, os arquivos de dados brutos devem ser posicionados na segui
 
 data/raw/
 ├── cncflora/
-│   ├── lista_vermelha_cnc_flora.csv
-│   └── termos_plantas.txt
+│   └── lista_vermelha_cnc_flora.csv
 ├── espacenet_input/
-│   ├── espacenet_angiosperma.csv
-│   └── espacenet_samambaias_e_licofitas.csv
-├── scopus_input/
-│   ├── scopus_angiospermas.csv
-│   └── ... (outros arquivos da Scopus)
-└── espacenet_resumo_plantas.csv
+│   └── espacenet_angiosperma.csv
+└── scopus_input/
+└── scopus_angiospermas.csv
 
-### 3. Execução do Pipeline Completo
+### 3. Execução do Pipeline
 
-Com o ambiente configurado e os dados no lugar, execute o pipeline com um único comando a partir da **pasta raiz** do projeto:
+O pipeline foi projetado para ser executado em etapas sequenciais. Execute os scripts orquestradores na ordem correta a partir da **pasta raiz** do projeto:
 
 ```bash
-python main.py
+# Etapa 1: Processa e unifica as fontes base
+python scripts/main\(EXECUTE\)/main_etapa1_base.py
 
-O script irá orquestrar todos os passos, exibindo o progresso no terminal. Ao final, todos os arquivos processados e modelados estarão na pasta data/processed/.
+# Etapa 2: Enriquece os dados com informações de sustentabilidade
+python scripts/main\(EXECUTE\)/main_etapa2_sustentabilidade.py
 
-⚙️ Descrição dos Componentes do Pipeline
-scripts/processar_scopus.py: Limpa, transforma e modela os dados da Scopus.
+# Etapa 3: Consolida e achata as tabelas para o modelo final
+python scripts/main\(EXECUTE\)/main_etapa3_achatamento.py
 
-scripts/processar_cncflora.py: Processa os dados da CNCFlora.
+# Etapa 4: Faz o upload dos dados para a camada de apresentação
+python scripts/main\(EXECUTE\)/main_etapa4_upload.py
 
-scripts/processar_espacenet.py: Processa os dados de patentes da Espacenet.
+## ⚙️ Descrição dos Componentes
+* **scripts/main(EXECUTE)/:** Contém os scripts orquestradores de cada uma das 4 etapas principais do pipeline.
+* **scripts/:** Contém os scripts específicos com a lógica de negócio para processar cada fonte de dados. São chamados pelos orquestradores.
+* **scripts/desenhar_pipeline.py:** Script utilitário para gerar o diagrama da arquitetura do projeto.
 
-scripts/unificar_fontes.py: Integra os outputs dos scripts de processamento, criando as dimensões mestras.
+## 🛣️ Roadmap de Trabalhos Futuros
+* Inclusão de novas fontes de dados (a serem definidas) e integração com o modelo de dados atual;
+* Avaliação geral do processo de automação.
 
-main.py: Orquestrador principal que executa todos os outros scripts na ordem correta.
-
-🗺️ Roadmap de Trabalhos Futuros
-Fase 2: Inclusão de novas fontes de dados sobre sustentabilidade e unificação com o modelo atual.
-
-Fase 3: Conexão do Data Warehouse final com o Looker Studio, desenvolvimento dos indicadores visuais e avaliação geral do processo.
-
-## Fluxograma do Pipeline
-```mermaid
-graph TD
-    ... (graph TD
-    subgraph "ETAPA 0: Fontes de Dados Brutos"
-        direction LR
-        A1["<font size=5>📄</font><br>Scopus CSVs"]
-        A2["<font size=5>📄</font><br>Espacenet CSVs"]
-        A3["<font size=5>📄</font><br>CNCFlora CSV"]
-        A4["<font size=5>📄</font><br>ODS Manual CSV"]
-        A5["<font size=5>📄</font><br>IPC Green Inv. CSVs"]
-    end
-
-    subgraph "ETAPA 1: Processamento de Dados Base (main_etapa1_base.py)"
-        B1["<font size=5>🐍</font><br>processar_scopus.py"]
-        B2["<font size=5>🐍</font><br>processar_espacenet.py"]
-        B3["<font size=5>🐍</font><br>processar_cncflora.py"]
-        B4["<font size=5>🐍</font><br>unificar_fontes.py"]
-    end
-
-    subgraph "Camada de Dados Processados (data/processed)"
-        C1["<font size=5>💾</font><br>scopus_limpos_temp.csv"]
-        C2["<font size=5>💾</font><br>dim_ipc.csv, etc."]
-        C3["<font size=5>💾</font><br>dim_especies_cncflora.csv"]
-        C4["<font size=5>💾</font><br>dim_especies_mestre.csv"]
-    end
-
-    subgraph "ETAPA 2: Enriquecimento com Sustentabilidade (main_etapa2_sustentabilidade.py)"
-        D1["<font size=5>🐍</font><br>processar_ods_manual.py"]
-        D2["<font size=5>🐍</font><br>processar_ipc_green.py"]
-    end
-
-    subgraph "Camada de Dados Enriquecidos"
-        E1["<font size=5>💾</font><br>artigos_com_ods.csv"]
-        E2["<font size=5>💾</font><br>ipc_classificado_green.csv"]
-    end
-    
-    subgraph "ETAPA 3: Upload para Apresentação (main_etapa3_google_sheets.py)"
-        F1["<font size=5>🐍</font><br>main_etapa3_google_sheets.py"]
-    end
-
-    subgraph "Camada de Apresentação"
-        G1["<font size=5>📈</font><br>Google Sheets"]
-        G2["<font size=5>🎨</font><br>Looker Studio"]
-    end
-
-    %% Conexões do Pipeline
-    A1 --> B1
-    A2 --> B2
-    A3 --> B3
-    
-    B1 --> C1
-    B2 --> C2
-    B3 --> C3
-    
-    C1 & C3 --> B4
-    B4 --> C4
-
-    C1 & A4 --> D1
-    C2 & A5 --> D2
-    
-    D1 --> E1
-    D2 --> E2
-
-    E1 & E2 --> F1
-    F1 --> G1
-    G1 --> G2
-    
-    %% Estilos para deixar mais bonito
-    style A1 fill:#cce5ff,stroke:#333,stroke-width:2px
-    style A2 fill:#cce5ff,stroke:#333,stroke-width:2px
-    style A3 fill:#cce5ff,stroke:#333,stroke-width:2px
-    style A4 fill:#cce5ff,stroke:#333,stroke-width:2px
-    style A5 fill:#cce5ff,stroke:#333,stroke-width:2px
-    
-    style B1 fill:#ffe5cc,stroke:#333,stroke-width:2px
-    style B2 fill:#ffe5cc,stroke:#333,stroke-width:2px
-    style B3 fill:#ffe5cc,stroke:#333,stroke-width:2px
-    style B4 fill:#ffe5cc,stroke:#333,stroke-width:2px
-    
-    style C1 fill:#d4edda,stroke:#333,stroke-width:2px
-    style C2 fill:#d4edda,stroke:#333,stroke-width:2px
-    style C3 fill:#d4edda,stroke:#333,stroke-width:2px
-    style C4 fill:#d4edda,stroke:#333,stroke-width:2px
-    
-    style D1 fill:#ffe5cc,stroke:#333,stroke-width:2px
-    style D2 fill:#ffe5cc,stroke:#333,stroke-width:2px
-
-    style E1 fill:#d4edda,stroke:#333,stroke-width:2px
-    style E2 fill:#d4edda,stroke:#333,stroke-width:2px
-    
-    style F1 fill:#ffe5cc,stroke:#333,stroke-width:2px
-    
-    style G1 fill:#fff0b3,stroke:#333,stroke-width:2px
-    style G2 fill:#f8d7da,stroke:#333,stroke-width:2px) ...
-```
