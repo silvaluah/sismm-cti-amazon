@@ -2,9 +2,15 @@ import pandas as pd
 from pathlib import Path
 import unicodedata
 import re
+import sys 
+import csv
 
 # ==============================================================================
 # ETAPA 1: FUNÇÕES DE CARREGAMENTO E LIMPEZA
+# ==============================================================================
+
+# ==============================================================================
+# FUNÇÕES AUXILIARES
 # ==============================================================================
 
 def carregar_dados_espacenet(caminho_pasta_raw):
@@ -17,15 +23,15 @@ def carregar_dados_espacenet(caminho_pasta_raw):
         print(f"ERRO: Nenhum arquivo CSV encontrado em '{caminho_pasta}'")
         return None
         
-    lista_dfs = [pd.read_csv(f, sep=';') for f in arquivos_csv]
+    lista_dfs = [pd.read_csv(f, sep=';', engine='python') for f in arquivos_csv]
     df_consolidado = pd.concat(lista_dfs, ignore_index=True)
-    print(f"Arquivos consolidados com sucesso! Total de {len(df_consolidado)} registros.")
+    print(f"Arquivos consolidados com sucesso! Total de {len(df_consolidado)} registros brutos.")
     return df_consolidado
 
 def limpeza_inicial_espacenet(df):
-    """Realiza a limpeza estrutural inicial: remove colunas, padroniza nomes e trata nulos."""
+    """Realiza a limpeza estrutural: padroniza nomes de colunas e trata nulos."""
     print("Iniciando limpeza estrutural...")
-    df_limpo = df.copy()
+    df_limpo = df.copy() # <-- USA O DATAFRAME RECEBIDO COMO PARÂMETRO
     
     colunas_unnamed = [col for col in df_limpo.columns if 'unnamed' in str(col).lower()]
     df_limpo = df_limpo.drop(columns=colunas_unnamed)
@@ -140,7 +146,7 @@ def criar_ligacao_especies_e_fato(df_limpo, df_manual, dim_especies_mestre):
             tabelas_ponte_data[f'pon_patente_{nome_ponte}'] = df_data_explodido[['publication_number', 'ano']].drop_duplicates()
 
     # Criar Tabela Fato
-    colunas_para_remover = ['inventors', 'applicants', 'ipc', 'cpc', 'earliest_priority', 'publication_date', 'earliest_publication']
+    colunas_para_remover = ['inventors', 'applicants', 'ipc', 'cpc']
     colunas_existentes = [col for col in colunas_para_remover if col in df_limpo.columns]
     fato_patentes_espacenet = df_limpo.drop(columns=colunas_existentes)
     
@@ -150,34 +156,61 @@ def criar_ligacao_especies_e_fato(df_limpo, df_manual, dim_especies_mestre):
 # FUNÇÃO PRINCIPAL (ORQUESTRADOR)
 # ==============================================================================
 
+# ==============================================================================
+# FUNÇÃO PRINCIPAL (ORQUESTRADOR)
+# ==============================================================================
+
 def main():
     """Função principal que orquestra todo o processo para a Espacenet."""
-    # Definição de Caminhos
     caminho_script = Path(__file__).parent
     caminho_repo_raiz = caminho_script.parent
     caminho_dados_raw = caminho_repo_raiz / 'data' / 'raw'
     caminho_dados_processados = caminho_repo_raiz / 'data' / 'processed'
     
-    # Dicionário de Países
-    COUNTRY_CODES = {'AR': 'Argentina', 'AT': 'Áustria', 'AU': 'Austrália', 'BR': 'Brasil', 'CA': 'Canadá', 'CH': 'Suíça', 'CN': 'China', 'DE': 'Alemanha', 'DK': 'Dinamarca', 'EP': 'Organização Europeia de Patentes (OPE/EPO)', 'ES': 'Espanha', 'FR': 'França', 'GB': 'Reino Unido', 'IL': 'Israel', 'IN': 'India', 'JP': 'Japão', 'KR': 'Coreia do Sul', 'RU': 'Federação Russa', 'US': 'Estados Unidos da América', 'WO': 'Organização Mundial da Propriedade Intelectual (OMPI/WIPO)', 'ZA': 'África do Sul'} # Versão resumida
+    COUNTRY_CODES = {'AR': 'Argentina', 'AT': 'Áustria', 'AU': 'Austrália', 'BR': 'Brasil', 'CA': 'Canadá', 'CH': 'Suíça', 'CN': 'China', 'DE': 'Alemanha', 'DK': 'Dinamarca', 'EP': 'Organização Europeia de Patentes (OPE/EPO)', 'ES': 'Espanha', 'FR': 'França', 'GB': 'Reino Unido', 'IL': 'Israel', 'IN': 'India', 'JP': 'Japão', 'KR': 'Coreia do Sul', 'RU': 'Federação Russa', 'US': 'Estados Unidos da América', 'WO': 'Organização Mundial da Propriedade Intelectual (OMPI/WIPO)', 'ZA': 'África do Sul'}
 
-    # Carga e Limpeza Inicial
-    df_espacenet = carregar_dados_espacenet(caminho_dados_raw / 'espacenet_input')
-    if df_espacenet is None: return
-    df_espacenet_limpo = limpeza_inicial_espacenet(df_espacenet)
+    # 1. Carga dos dados brutos
+    df_consolidado = carregar_dados_espacenet(caminho_dados_raw / 'espacenet_input')
+    if df_consolidado is None: return
+
+    # 2. Achatamento (Explode)
+    print("⏳ Achatando registros com múltiplos 'publication_number'...")
+    # Primeiro padroniza os nomes para encontrar 'publication_number'
+    # Esta é uma padronização rápida apenas para a coluna de interesse
+    df_consolidado.columns = [col.lower().replace(' ', '_').replace('-', '_') for col in df_consolidado.columns]
     
-    # Criação das Dimensões e Pontes
+    if 'publication_number' not in df_consolidado.columns:
+        print(f"✖ ERRO: Coluna 'publication_number' não encontrada nos arquivos de entrada. Colunas disponíveis: {df_consolidado.columns.tolist()}")
+        sys.exit(1)
+        
+    df_consolidado['publication_number'] = df_consolidado['publication_number'].astype(str).str.split(',')
+    df_achatado = df_consolidado.explode('publication_number')
+    df_achatado['publication_number'] = df_achatado['publication_number'].str.strip()
+    print(f"✔ Achatamento concluído. O dataset agora tem {len(df_achatado)} linhas.")
+    
+    # 3. Limpeza Inicial completa (agora usando o DataFrame correto)
+    df_espacenet_limpo = limpeza_inicial_espacenet(df_achatado)
+    
+    # 4. Criação das Dimensões e Pontes
+    dim_parties, pon_patente_party = criar_modelo_parties(df_espacenet_limpo)
+    dim_country, pon_patente_country = criar_modelo_country(df_espacenet_limpo, COUNTRY_CODES)
+    dim_ipc, pon_patente_ipc = criar_modelo_ipc(df_espacenet_limpo)
+
+    # 5. O resto do script usa o DataFrame já achatado e limpo
+    df_espacenet_limpo = df_achatado
+    
+    # 6. Criação das Dimensões e Pontes
     dim_parties, pon_patente_party = criar_modelo_parties(df_espacenet_limpo)
     dim_country, pon_patente_country = criar_modelo_country(df_espacenet_limpo, COUNTRY_CODES)
     dim_ipc, pon_patente_ipc = criar_modelo_ipc(df_espacenet_limpo)
     
-    # Carregar arquivos manuais e mestre para a etapa final
+    # 7. Carregar arquivos manuais e mestre
     df_manual = pd.read_csv(caminho_dados_raw / 'espacenet_resumo_plantas.csv')
     dim_especies_mestre = pd.read_csv(caminho_dados_processados / 'dim_especies_mestre.csv')
     
     fato_patentes, pon_especie, pontes_data = criar_ligacao_especies_e_fato(df_espacenet_limpo, df_manual, dim_especies_mestre)
     
-    # Salvar todos os arquivos
+    # 8. Salvar todos os arquivos
     caminho_saida = caminho_dados_processados / 'espacenet'
     caminho_saida.mkdir(parents=True, exist_ok=True)
     
@@ -191,7 +224,8 @@ def main():
     print("\n--- Salvando todos os arquivos processados ---")
     for nome, df in tabelas_para_salvar.items():
         if df is not None:
-            df.to_csv(caminho_saida / f"{nome}.csv", index=False)
+            # Adiciona quoting=csv.QUOTE_ALL para um salvamento mais robusto
+            df.to_csv(caminho_saida / f"{nome}.csv", index=False, quoting=csv.QUOTE_ALL)
             print(f"Salvo: {nome}.csv")
     
     print(f"\nProcessamento da Espacenet concluído. Arquivos salvos em: {caminho_saida}")

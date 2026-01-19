@@ -99,20 +99,26 @@ def main():
     other_dir = Path ("data")
     
     arquivos_para_enviar = {
+
+        # Arquivos sobre artigos
         'art_afiliacao': looker_output_dir / 'fato_afiliacoes_final.csv',
         'art_autor': looker_output_dir / 'looker_artigo_autor.csv',
-        'art_especie': looker_output_dir / 'looker_artigo_especie.csv',
+        'art_especie': looker_output_dir / 'art_especie.csv',
         'art_keywords': looker_output_dir / 'looker_artigo_keywords_unificadas.csv',
-        'art_completos': looker_output_dir / 'looker_artigos_completo.csv',
-        'art_fato': looker_output_dir / 'looker_fato_artigos.csv',
+        'art_fato': looker_output_dir / 'art_fato.csv',
+        'art_ods': looker_output_dir / "art_ods.csv",
+ 
+
+        # Arquivos sobre patentes
         'pat_fato': looker_output_dir / 'looker_fato_patentes.csv',
         'pat_country': looker_output_dir / 'looker_patente_country.csv',
         'pat_especie': looker_output_dir / 'looker_patente_especie.csv',
         'pat_partes': looker_output_dir / 'looker_patente_partes.csv',
         'pat_completo': looker_output_dir / 'looker_patentes_completo.csv',
-        'fat_cnc': looker_output_dir / 'looker_fato_cncflora.csv',
+        'pat_ipc': looker_output_dir / 'looker_patente_ipc.csv',
 
-        'art_ods': other_dir / "scopus_ods_v1.csv",
+        # Outros arquivos
+        'fat_cnc': looker_output_dir / 'looker_fato_cncflora.csv',
         'dim_pat_especie': other_dir / "processed/dim_especies_mestre.csv"
 
     }

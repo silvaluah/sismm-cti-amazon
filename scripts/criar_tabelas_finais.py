@@ -3,10 +3,15 @@ from pathlib import Path
 import sys
 import csv
 
-def carregar_csv_robusto(filepath):
-    """Função auxiliar para carregar um CSV usando o engine='python' e tratando erros."""
+def carregar_csv_robusto(filepath, dtypes=None):
+    """
+    Função auxiliar para carregar um CSV usando o engine='python',
+    tratando erros e opcionalmente forçando tipos de dados.
+    """
     try:
-        df = pd.read_csv(filepath, engine='python')
+        # Passa o argumento 'dtype' diretamente para o read_csv
+        df = pd.read_csv(filepath, engine='python', dtype=dtypes) 
+        
         if df.empty:
             print(f"  - Aviso: O arquivo '{filepath}' está vazio.")
         return df
@@ -39,6 +44,20 @@ def main():
     # 1. CARREGAMENTO ROBUSTO DE TODOS OS ARQUIVOS
     # ==============================================================================
     print("⏳ Carregando todos os arquivos de dados processados...")
+    # Defina suas chaves de merge aqui
+    chaves_artigo = {'article_id': str, 'eid': str, 'EID_Artigo': str}
+    chaves_patente = {'publication_number': str}
+    chaves_ids_dim = {
+        'especie_id': str,
+        'authors_id': str,
+        'affiliation_id': str,
+        'keyword_id': str,
+        'index_keyword_id': str,
+        'ipc_id': str,
+        'ipc_code': str,
+        'country_id': str,
+        'party_id': str
+    }
     
     # CNCFlora
     df_dim_especies = carregar_csv_robusto(processed_dir / 'dim_especies_mestre.csv')
@@ -47,9 +66,9 @@ def main():
 
     # Scopus
     df_artigos_base = carregar_csv_robusto(processed_dir / 'scopus_dados_limpos_temp.csv')
-    df_dim_autores = carregar_csv_robusto(processed_dir / 'dim_autores_scopus.csv')
-    df_pon_autores = carregar_csv_robusto(processed_dir / 'pon_artigo_autores_scopus.csv')
-    df_dim_afiliacoes = carregar_csv_robusto(processed_dir / 'dim_afiliacoes_FINAL_v2.csv')
+    df_dim_autores = carregar_csv_robusto(processed_dir / 'dim_autores_scopus.csv', dtypes=chaves_ids_dim)
+    df_pon_autores = carregar_csv_robusto(processed_dir / 'pon_artigo_autores_scopus.csv', dtypes={**chaves_artigo, **chaves_ids_dim})
+    df_dim_afiliacoes = carregar_csv_robusto(processed_dir / 'dim_afiliacoes_scopus.csv')
     df_pon_afiliacoes = carregar_csv_robusto(processed_dir / 'pon_artigo_afiliacoes_scopus.csv')
     df_dim_keywords = carregar_csv_robusto(processed_dir / 'dim_keywords_scopus.csv')
     df_pon_keywords = carregar_csv_robusto(processed_dir / 'pon_artigo_keywords_scopus.csv')
@@ -67,6 +86,9 @@ def main():
     df_pon_country = carregar_csv_robusto(processed_dir / 'espacenet/pon_patente_country.csv')
     df_dim_partes = carregar_csv_robusto(processed_dir / 'espacenet/dim_parties.csv')
     df_pon_partes = carregar_csv_robusto(processed_dir / 'espacenet/pon_patente_party.csv')
+    df_pon_primeira_public = carregar_csv_robusto(processed_dir / 'espacenet/pon_patente_ano_primeira_publicacao.csv')
+    df_pon_prioridade = carregar_csv_robusto(processed_dir / 'espacenet/pon_patente_ano_prioridade.csv')
+    df_pon_publicacao = carregar_csv_robusto(processed_dir / 'espacenet/pon_patente_ano_publicacao.csv')
 
     print("✔ Todos os arquivos carregados com sucesso.")
 
@@ -75,7 +97,7 @@ def main():
     # ==============================================================================
     print("⏳ Garantindo a consistência dos tipos de dados para os merges...")
     
-    # Chaves de Artigos
+   # --- CHAVES DE ARTIGO ('article_id' ou 'eid') ---
     df_artigos_base = to_str_safe(df_artigos_base, 'eid')
     df_pon_autores = to_str_safe(df_pon_autores, 'article_id')
     df_pon_afiliacoes = to_str_safe(df_pon_afiliacoes, 'article_id')
@@ -84,28 +106,36 @@ def main():
     df_pon_artigo_especie = to_str_safe(df_pon_artigo_especie, 'article_id')
     df_ods_manual = to_str_safe(df_ods_manual, 'EID_Artigo')
 
-    # Chaves de Patentes
+    # --- CHAVES DE PATENTE ('publication_number') ---
     df_fato_patentes = to_str_safe(df_fato_patentes, 'publication_number')
     df_pon_country = to_str_safe(df_pon_country, 'publication_number')
     df_pon_patente_especie = to_str_safe(df_pon_patente_especie, 'publication_number')
     df_pon_ipc = to_str_safe(df_pon_ipc, 'publication_number')
     df_pon_partes = to_str_safe(df_pon_partes, 'publication_number')
-    
-    # Chaves de Dimensões
+    df_pon_publicacao = to_str_safe(df_pon_publicacao, 'publication_number')
+    df_pon_prioridade = to_str_safe(df_pon_prioridade, 'publication_number')
+    df_pon_primeira_public = to_str_safe(df_pon_primeira_public, 'publication_number')
+
+    # --- CHAVES DE DIMENSÃO (IDs únicos) ---
+    # Espécies
     df_dim_especies = to_str_safe(df_dim_especies, 'especie_id')
-    df_pon_patente_especie = to_str_safe(df_pon_patente_especie, 'especie_id')
     df_pon_artigo_especie = to_str_safe(df_pon_artigo_especie, 'especie_id')
+    # Autores
     df_dim_autores = to_str_safe(df_dim_autores, 'authors_id')
     df_pon_autores = to_str_safe(df_pon_autores, 'authors_id')
+    # Afiliações
     df_dim_afiliacoes = to_str_safe(df_dim_afiliacoes, 'affiliation_id')
     df_pon_afiliacoes = to_str_safe(df_pon_afiliacoes, 'affiliation_id')
+    # Keywords
     df_dim_keywords = to_str_safe(df_dim_keywords, 'keyword_id')
     df_pon_keywords = to_str_safe(df_pon_keywords, 'keyword_id')
     df_dim_index_keywords = to_str_safe(df_dim_index_keywords, 'index_keyword_id')
     df_pon_index_keywords = to_str_safe(df_pon_index_keywords, 'index_keyword_id')
+    # IPC
     df_ipc_green = to_str_safe(df_ipc_green, 'ipc_code')
-    df_pon_ipc = to_str_safe(df_pon_ipc, 'ipc_id')
     df_dim_ipc = to_str_safe(df_dim_ipc, 'ipc_id')
+    df_pon_ipc = to_str_safe(df_pon_ipc, 'ipc_id') # A chave aqui é o ID numérico
+    # Country e Parties
     df_dim_country = to_str_safe(df_dim_country, 'country_id')
     df_pon_country = to_str_safe(df_pon_country, 'country_id')
     df_dim_partes = to_str_safe(df_dim_partes, 'party_id')
@@ -204,11 +234,47 @@ def main():
     df_patentes_final = df_fato_patentes.copy()
     df_patentes_final.to_csv(looker_output_dir / "looker_fato_patentes.csv", index=False, quoting=csv.QUOTE_ALL)
     print("  - Salvo: looker_fato_patentes.csv")
+    # --- JUNÇÃO COM OS ANOS ---
+    # Para cada tipo de ano, fazemos um 'left merge' para adicionar a coluna
+    # O 'left merge' garante que todas as patentes da tabela fato sejam mantidas.
+    if not df_pon_publicacao.empty:
+        # Como uma patente pode ter múltiplos anos de publicação, pegamos apenas o primeiro (ou o mais recente)
+        # Usamos .drop_duplicates para garantir uma relação 1-para-1
+        primeiro_ano_pub = df_pon_publicacao.sort_values('ano').drop_duplicates('publication_number', keep='first')
+        df_patentes_final = pd.merge(
+            df_patentes_final,
+            primeiro_ano_pub[['publication_number', 'ano']],
+            on='publication_number',
+            how='left'
+        )
+        df_patentes_final.rename(columns={'ano': 'ano_publicacao'}, inplace=True)
+        print("  - Informação de 'Ano de Publicação' adicionada.")
 
-   # Tabela Fato Principal (sem modificações)
-    if not df_fato_patentes.empty:
-        df_fato_patentes.to_csv(looker_output_dir / "looker_fato_patentes.csv", index=False, quoting=csv.QUOTE_ALL)
-        print("  - Salvo: looker_fato_patentes.csv")
+    if not df_pon_prioridade.empty:
+        primeiro_ano_prio = df_pon_prioridade.sort_values('ano').drop_duplicates('publication_number', keep='first')
+        df_patentes_final = pd.merge(
+            df_patentes_final,
+            primeiro_ano_prio[['publication_number', 'ano']],
+            on='publication_number',
+            how='left'
+        )
+        df_patentes_final.rename(columns={'ano': 'ano_prioridade'}, inplace=True)
+        print("  - Informação de 'Ano de Prioridade' adicionada.")
+
+    if not df_pon_primeira_public.empty:
+        primeiro_ano_pp = df_pon_primeira_public.sort_values('ano').drop_duplicates('publication_number', keep='first')
+        df_patentes_final = pd.merge(
+            df_patentes_final,
+            primeiro_ano_pp[['publication_number', 'ano']],
+            on='publication_number',
+            how='left'
+        )
+        df_patentes_final.rename(columns={'ano': 'ano_primeira_publicacao'}, inplace=True)
+        print("  - Informação de 'Ano de Primeira Publicação' adicionada.")
+
+    # --- Salva a Tabela Fato ENRIQUECIDA ---
+    df_patentes_final.to_csv(looker_output_dir / "looker_fato_patentes.csv", index=False, quoting=csv.QUOTE_ALL)
+    print("  - Salvo: looker_fato_patentes.csv (agora com colunas de ano)")
 
     # Relação Patente <-> IPC (com info Green)
     if not df_pon_ipc.empty and not df_dim_ipc.empty and not df_ipc_green.empty:
