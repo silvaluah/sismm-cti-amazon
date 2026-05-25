@@ -76,11 +76,34 @@ Antes da execução, os arquivos de dados brutos devem ser posicionados na segui
 
     data/raw/
     ├── cncflora/
-    │   └── lista_vermelha_cnc_flora.csv
+    │   └── atualizacao_plantas_v1/
+    │       └── distribution.txt
+    |       └── speciesprofile.txt
+    |       └── taxon.txt
+    |       └── vernacularname.txt
+    |   └── lista_vermelha_cnc_flora.csv
+    |   └── termos_plantas.txt
     ├── espacenet_input/
     │   └── espacenet_angiosperma.csv
+    │   └── espacenet_samabias_e_licofitas.csv
+    └── ipc/
+    |   └── ipc_full/
+    |       └── consolidated_ipc_level_1.csv
+    |       └── consolidated_ipc_level_2.csv
+    |       └── consolidated_ipc_level_3.csv
+    |       └── consolidated_ipc_level_4.csv
+    |       └── consolidated_ipc_level_5.csv
+    |   └── ipc_gi/
+    |       └── processed_ipc_gi_level_9.csv
     └── scopus_input/
-    └── scopus_angiospermas.csv
+    |   └── scopus_angiospermas.csv
+    |   └── scopus_briófitas_hepáticas.csv
+    |   └── scopus_briófitas_musgos.csv
+    |   └── scopus_fungos_strictusensus.csv
+    |   └── scopus_samambias_e_licófitas.csv
+    └── dicionario_afiliacoes.csv
+    └── espacenet_resumo_plantas.csv
+    └── scopus_ods_v1.csv
 
 ### 3. Execução do Pipeline
 
@@ -111,5 +134,32 @@ python scripts/main\(EXECUTE\)/main_etapa4_upload.py
 ## 🛣️ Roadmap de Trabalhos Futuros
 
     * Inclusão de novas fontes de dados (a serem definidas) e integração com o modelo de dados atual;
-    * Avaliação geral do processo de automação.
+    * Avaliação geral do processo de automação;
+    * Inclusão de novos biomas no mapeamento;
+    * Refinamento dos recursos do painel (Looker Studio);
+    * Refinamento dos recursos gráficos e analíticos.
+
+
+## ⏳ Atualizações mais recentes
+
+   * Inclusão de arquivo de novos dados, publicados pelo CNCFlora, sobre as plantas endêmicas correspondente ao Semestre 01/2026 (em 25/maio/2026): /workspaces/sismm-cti-amazon/data/raw/cncflora/atualizacao_plantas_v1.
+   * Criação de scrip para filtragem dos dados de plantas "endêmicas" do domínio fitogeográfico "Amazônia" do novo upload e cruzamento com a listagem anterior para atualização e consolidação (25/maio/2026)
+
+
+--------------------
+
+# COMO ATUALIZAR? ♻️
+
+## 1 Lista de espécies e endemismo
+   1.1 Acesse ao site: https://ipt.jbrj.gov.br/jbrj/resource?r=lista_especies_flora_brasil
+   
+   1.2 Baixe o último arquivo disponível no formato "Darwin Core Archive (DwC-A)"
+
+   1.3 Execute o script `scripts/atualizar_flora.py`
+
+
+## 2 Lista de artigos com base nas plantas 
+
+(passo-a-passo em andamento)
+
 
